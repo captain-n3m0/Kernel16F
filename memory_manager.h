@@ -1,56 +1,30 @@
-#define MEMORY_SIZE 1024 // Size of the memory pool in bytes
+#ifndef MEMORY_MANAGER_H
+#define MEMORY_MANAGER_H
 
-// Memory pool
-char memory[MEMORY_SIZE];
+#include <stdint.h>
 
-// Allocation table
-int allocation_table[MEMORY_SIZE];
+/* Size of each memory block */
+#define BLOCK_SIZE 4096
 
-// Initializes the memory manager
-void init_memory_manager() {
-    memset(memory, 0, MEMORY_SIZE);
-    memset(allocation_table, 0, MEMORY_SIZE * sizeof(int));
-}
+/* Number of memory blocks available for allocation */
+#define NUM_BLOCKS 1024
 
-// Allocates a block of memory of the specified size
-void* allocate_memory(int size) {
-    // Find the first available block of memory
-    int block_start = -1;
-    for (int i = 0; i < MEMORY_SIZE; i++) {
-        if (allocation_table[i] == 0) {
-            // Found an available block
-            block_start = i;
-            break;
-        }
-    }
+/* Start address of the memory pool */
+#define MEMORY_START_ADDRESS 0x100000
 
-    if (block_start == -1) {
-        // No available block found
-        return NULL;
-    }
+/* Structure representing a memory block */
+typedef struct block {
+    uint8_t data[BLOCK_SIZE];
+    struct block* next;
+} block_t;
 
-    // Check if there is enough space in the memory pool
-    if (block_start + size > MEMORY_SIZE) {
-        // Not enough space
-        return NULL;
-    }
+/* Initialize the memory pool */
+void mem_init();
 
-    // Allocate the block
-    for (int i = block_start; i < block_start + size; i++) {
-        allocation_table[i] = 1;
-    }
+/* Allocate a memory block */
+void* mem_alloc();
 
-    // Return the pointer to the allocated block
-    return &memory[block_start];
-}
+/* Free a previously allocated memory block */
+void mem_free(void* ptr);
 
-// Frees a block of memory allocated with allocate_memory()
-void free_memory(void* ptr, int size) {
-    // Calculate the start index of the block
-    int block_start = (int)ptr - (int)memory;
-
-    // Free the block
-    for (int i = block_start; i < block_start + size; i++) {
-        allocation_table[i] = 0;
-    }
-}
+#endif /* MEMORY_MANAGER_H */

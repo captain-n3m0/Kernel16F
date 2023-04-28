@@ -1,3 +1,4 @@
+#define KERNEL_LOAD_ADDRESS = 0x1000
 #include <stdio.h>
 #include <string.h>
 

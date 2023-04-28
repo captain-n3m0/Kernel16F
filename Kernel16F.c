@@ -96,16 +96,16 @@ void start() {
             print_string("\nExiting...");
             halt();
         }  else if (strcmp(command, "echo") == 0) {
-    // Echo the user input back to the screen
+            // Echo the user input back to the screen
             print_string("\nEnter text to echo: ");
-            char input[256];
-            scanf("%s", input);
-            print_string("\nYou entered: ");
-            print_string(input);}
+            char text[256];
+            scanf("%s", text);
+            print_string("\n");
+            print_string(text);
         } else {
-            // Invalid command
-                    print_string("\nInvalid command. Please try again.");
+            // Unknown command
+            print_string("\nUnknown command: ");
+            print_string(command);
+        }
     }
 }
-// Boot signature
-unsigned short boot_signature = 0xAA55;

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "memory_manager.h"
 
 #define BLOCK_SIZE 512
 #define NUM_BLOCKS 1024
@@ -27,6 +28,32 @@ inode inodes[NUM_INODES];
 block blocks[NUM_BLOCKS];
 int free_blocks[NUM_BLOCKS];
 int free_blocks_index = 0;
+
+void kernel_main() {
+    // Initialize the memory manager
+    init_memory_manager();
+
+    // Allocate some memory
+    void* ptr = allocate_memory(1024);
+
+    // Print the address of the allocated memory
+    printf("Allocated memory at address %p\n", ptr);
+
+    // Free the allocated memory
+    free_memory(ptr);
+
+    // Allocate some more memory
+    void* ptr2 = allocate_memory(2048);
+
+    // Print the address of the second allocated memory
+    printf("Allocated memory at address %p\n", ptr2);
+
+    // Free the second allocated memory
+    free_memory(ptr2);
+
+    // Shutdown the memory manager
+    shutdown_memory_manager();
+}
 
 void initialize_filesystem() {
     // Initialize the free block list

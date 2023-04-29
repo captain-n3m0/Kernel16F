@@ -1,162 +1,211 @@
-#include "memory_manager.h"
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
-#define KERNEL_LOAD_ADDRESS 0x1000
-#define STACK_SIZE 1024
+#define MAX_COMMAND_LENGTH 256
+#define MAX_HISTORY_LENGTH 10
+#define MAX_USERNAME_LENGTH 20
+#define MAX_PASSWORD_LENGTH 20
 
-// Define a task structure to hold information about each task
-typedef struct task {
-    uint32_t id;
-    uint32_t esp;
-    uint32_t cr3;
-    uint32_t state;
-} task_t;
+char* history[MAX_HISTORY_LENGTH];
+int history_index = 0;
 
-// Define constants for the task states
-#define TASK_STATE_READY 0
-#define TASK_STATE_RUNNING 1
-#define TASK_STATE_BLOCKED 2
+char* username = "admin";
+char* password = "password";
 
-// Define a variable to hold the current task ID
-static uint32_t current_task_id = 0;
-
-// Define an array to hold the tasks
-static task_t tasks[5];
-
-// Define the kernel stack and stack pointer
-static uint8_t kernel_stack[STACK_SIZE];
-static uint32_t kernel_stack_pointer = (uint32_t) kernel_stack + STACK_SIZE;
-
-// Define the task stacks and stack pointers
-static uint8_t task1_stack[STACK_SIZE];
-static uint32_t task1_stack_pointer = (uint32_t) task1_stack + STACK_SIZE;
-
-static uint8_t task2_stack[STACK_SIZE];
-static uint32_t task2_stack_pointer = (uint32_t) task2_stack + STACK_SIZE;
-
-static uint8_t task3_stack[STACK_SIZE];
-static uint32_t task3_stack_pointer = (uint32_t) task3_stack + STACK_SIZE;
-
-static uint8_t task4_stack[STACK_SIZE];
-static uint32_t task4_stack_pointer = (uint32_t) task4_stack + STACK_SIZE;
-
-// Define the function prototypes for the tasks
-void task1();
-void task2();
-void task3();
-void task4();
-
-// Define the scheduler function
-void scheduler() {
-    // Save the current task's ESP and CR3
-    tasks[current_task_id].esp = read_esp();
-    tasks[current_task_id].cr3 = read_cr3();
-
-    // Find the next ready task
-    uint32_t next_task_id = (current_task_id + 1) % 5;
-    while (tasks[next_task_id].state != TASK_STATE_READY) {
-        next_task_id = (next_task_id + 1) % 5;
+void print_string(char* str) {
+    char* video_memory = (char*) 0xB8000;
+    while (*str != '\0') {
+        *video_memory++ = *str++;
+        *video_memory++ = 0x0F; // Set the text color to white on black
     }
-
-    // Switch to the next task
-    tasks[current_task_id].state = TASK_STATE_READY;
-    tasks[next_task_id].state = TASK_STATE_RUNNING;
-    current_task_id = next_task_id;
-    write_esp(tasks[current_task_id].esp);
-    write_cr3(tasks[current_task_id].cr3);
 }
 
-// Define the task functions
+void halt() {
+    asm("cli");
+    asm("hlt");
+}
+
+void int_handler() {
+    asm("push %ax");
+    asm("push %bx");
+    asm("push %cx");
+    asm("push %dx");
+
+    // Check which interrupt occurred
+    asm("mov $0x0E, %ah");
+    asm("mov $0x00, %bh");
+    asm("mov $0x07, %bl");
+    asm("mov $'I', %al");
+    asm("int $0x10");
+
+    asm("pop %dx");
+    asm("pop %cx");
+    asm("pop %bx");
+    asm("pop %ax");
+}
+
+void sys_call() {
+    asm("push %ax");
+    asm("push %bx");
+    asm("push %cx");
+    asm("push %dx");
+
+    // Check which system call was requested
+    asm("mov $0x0E, %ah");
+    asm("mov $0x00, %bh");
+    asm("mov $0x07, %bl");
+    asm("mov $'S', %al");
+    asm("int $0x10");
+
+    asm("pop %dx");
+    asm("pop %cx");
+    asm("pop %bx");
+    asm("pop %ax");
+}
+
+void add_to_history(char* command) {
+    if (history_index == MAX_HISTORY_LENGTH) {
+        free(history[0]);
+        for (int i = 0; i < MAX_HISTORY_LENGTH - 1; i++) {
+            history[i] = history[i+1];
+        }
+        history_index--;
+    }
+    history[history_index++] = strdup(command);
+}
+
+void print_history() {
+    for (int i = 0; i < history_index; i++) {
+        printf("%d: %s\n", i+1, history[i]);
+    }
+}
+
+void idle_task() {
+    while (1) {
+        // Do nothing
+    }
+}
+
 void task1() {
     while (1) {
-        // Task 1 behavior here
-        scheduler();
+        print_string("\nTask 1 running...");
     }
 }
 
 void task2() {
     while (1) {
-        // Task 2 behavior here
-        scheduler();
+        print_string("\nTask 2 running...");
     }
 }
 
 void task3() {
     while (1) {
-        // Task 3 behavior here
-        scheduler();
+        print_string("\nTask 3 running...");
     }
 }
 
-void task4() {
-    while (1) {
-        // Task 4 behavior here
-        scheduler();
-    }
-}
-
-// Define the kernel function
-void kernel() {
+void start() {
     // Initialize the data segment register to 0x0000
     asm("mov $0x0000, %ax");
     asm("mov %ax, %ds");
 
-    // Initialize the task structures
-    tasks[0].id = 0;
-    tasks[0].esp = kernel_stack_pointer;
-    tasks[0].cr3 = read_cr3();
-    tasks[0].state = TASK_STATE_RUNNING;
+    // Authenticate the user
+    char input_username[MAX_USERNAME_LENGTH];
+    char input_password[MAX_PASSWORD_LENGTH];
+    do {
+        printf("Username: ");
+        scanf("%s", input_username);
+        printf("Password: ");
+        scanf("%s", input_password);
+    } while (strcmp(input_username, username) != 0 || strcmp(input_password, password) != 0);
 
-    tasks[1].id = 1;
-    tasks[1].esp = task1_stack_pointer;
-    tasks[1].cr3 = setup
-// Define the remaining tasks
-    tasks[1].state = TASK_STATE_READY;
-    tasks[2].id = 2;
-    tasks[2].esp = task2_stack_pointer;
-    tasks[2].cr3 = setup_page_directory();
-    tasks[2].state = TASK_STATE_READY;
-    tasks[3].id = 3;
-    tasks[3].esp = task3_stack_pointer;
-    tasks[3].cr3 = setup_page_directory();
-    tasks[3].state = TASK_STATE_READY;
-    tasks[4].id = 4;
-    tasks[4].esp = task4_stack_pointer;
-    tasks[4].cr3 = setup_page_directory();
-    tasks[4].state = TASK_STATE_READY;
-// Set up the kernel stack pointer
-kernel_stack_pointer -= sizeof(uint32_t);
-*(uint32_t*) kernel_stack_pointer = (uint32_t) &scheduler;
+    // Print the welcome message
+    print_string("Welcome to the command line interface!");
 
-// Set up the task 1 stack pointer
-task1_stack_pointer -= sizeof(uint32_t);
-*(uint32_t*) task1_stack_pointer = (uint32_t) &task1;
+    // Initialize the task list
+    void (*tasks[])() = {idle_task, task1, task2, task3};
+    int num_tasks = sizeof(tasks) / sizeof(tasks[0]);
+    int current_task = 0;
 
-// Set up the task 2 stack pointer
-task2_stack_pointer -= sizeof(uint32_t);
-*(uint32_t*) task2_stack_pointer = (uint32_t) &task2;
+    // Loop to accept user commands
+    while (1) {
+        char command[MAX_COMMAND_LENGTH];
+        print_string("\nEnter a command: ");
+        scanf("%s", command);
 
-// Set up the task 3 stack pointer
-task3_stack_pointer -= sizeof(uint32_t);
-*(uint32_t*) task3_stack_pointer = (uint32_t) &task3;
+        // Add the command to the history
+        add_to_history(command);
 
-// Set up the task 4 stack pointer
-task4_stack_pointer -= sizeof(uint32_t);
-*(uint32_t*) task4_stack_pointer = (uint32_t) &task4;
+        if (strcmp(command, "ls") == 0) {
+            // List the files in the current directory
+            print_string("\nListing files...");
+            // TODO: Implement file listing
+        } else if (strcmp(command, "cd") == 0) {
+            // Change the current directory
+            print_string("\nChanging directory...");
+            // TODO: Implement directory changing
+        } else if (strcmp(command, "mkdir") == 0) {
+            // Create a new directory
+            print_string("\nCreating directory...");
+            // TODO: Implement directory creation
+        } else if (strcmp(command, "touch") == 0) {
+            // Create a new file
+            print_string("\nCreating file...");
+            // TODO: Implement file creation
+        } else if (strcmp(command, "rm") == 0) {
+            // Delete a file
+            print_string("\nDeleting file...");
+            // TODO: Implement file deletion
+        } else if (strcmp(command, "rmdir") == 0) {
+            // Delete a directory
+            print_string("\nDeleting directory...");
+            // TODO: Implement directory deletion
+        } else if (strcmp(command, "cat") == 0) {
+            // Print the contents of a file
+            char filename[MAX_COMMAND_LENGTH];
+            print_string("\nEnter filename: ");
+            scanf("%s", filename);
+            FILE* file = fopen(filename, "r");
+            if (file == NULL) {
+                print_string("\nFile not found.");
+            } else {
+                char line[MAX_COMMAND_LENGTH];
+                while (fgets(line, MAX_COMMAND_LENGTH, file) != NULL) {
+                    printf("%s", line);
+                }
+                fclose(file);
+            }
+        } else if (strcmp(command, "echo") == 0) {
+            // Write a string to a file
+            char filename[MAX_COMMAND_LENGTH];
+            print_string("\nEnter filename: ");
+            scanf("%s", filename);
+            char text[MAX_COMMAND_LENGTH];
+            print_string("\nEnter text: ");
+            scanf("%s", text);
+            FILE* file = fopen(filename, "w");
+            if (file == NULL) {
+                print_string("\nError creating file.");
+            } else {
+                fprintf(file, "%s", text);
+                fclose(file);
+            }
+        } else if (strcmp(command, "history") == 0) {
+            // Print the command history
+            print_history();
+        } else if (strcmp(command, "exit") == 0) {
+            // Exit the command line interface
+            print_string("\nExiting...");
+            halt();
+        } else {
+            // Unknown command
+            print_string("\nUnknown command: ");
+            print_string(command);
+        }
 
-// Set up the interrupt descriptor table
-setup_idt();
-
-// Start the scheduler
-scheduler();
-}
-
-// Define the main function
-int main() {
-// Load the kernel
-load_kernel(KERNEL_LOAD_ADDRESS);
-// Jump to the kernel
-jump_to_kernel(KERNEL_LOAD_ADDRESS);
-
-// We should never get here
-return 0;
+        // Switch to the next task
+        current_task = (current_task + 1) % num_tasks;
+        tasks[current_task]();
+    }
 }

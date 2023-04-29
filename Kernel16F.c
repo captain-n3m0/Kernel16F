@@ -1,18 +1,175 @@
-#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
-#define MAX_COMMAND_LENGTH 256
-#define MAX_HISTORY_LENGTH 10
-#define MAX_USERNAME_LENGTH 20
-#define MAX_PASSWORD_LENGTH 20
+#define BLOCK_SIZE 512
+#define NUM_BLOCKS 1024
+#define NUM_INODES 64
+#define MAX_FILENAME_LENGTH 16
+#define MAX_FILE_SIZE (NUM_BLOCKS / 2 * BLOCK_SIZE)
 
-char* history[MAX_HISTORY_LENGTH];
-int history_index = 0;
+typedef struct {
+    int block_number;
+    int offset;
+} file_pointer;
 
-char* username = "admin";
-char* password = "password";
+typedef struct {
+    char name[MAX_FILENAME_LENGTH];
+    int size;
+    int blocks[NUM_BLOCKS / 2];
+} inode;
+
+typedef struct {
+    char data[BLOCK_SIZE];
+} block;
+
+inode inodes[NUM_INODES];
+block blocks[NUM_BLOCKS];
+int free_blocks[NUM_BLOCKS];
+int free_blocks_index = 0;
+
+void initialize_filesystem() {
+    // Initialize the free block list
+    for (int i = 0; i < NUM_BLOCKS; i++) {
+        free_blocks[i] = i;
+    }
+
+    // Initialize the root directory
+    strcpy(inodes[0].name, "/");
+    inodes[0].size = 0;
+    for (int i = 0; i < NUM_BLOCKS / 2; i++) {
+        inodes[0].blocks[i] = -1;
+    }
+}
+
+int allocate_block() {
+    if (free_blocks_index == NUM_BLOCKS) {
+        return -1; // No free blocks available
+    }
+    int block_number = free_blocks[free_blocks_index++];
+    return block_number;
+}
+
+void free_block(int block_number) {
+    free_blocks[--free_blocks_index] = block_number;
+}
+
+int find_inode(char* path) {
+    if (strcmp(path, "/") == 0) {
+        return 0; // Root directory
+    }
+    for (int i = 1; i < NUM_INODES; i++) {
+        if (strcmp(path, inodes[i].name) == 0) {
+            return i; // Found the inode
+        }
+    }
+    return -1; // Inode not found
+}
+
+file_pointer open_file(char* path) {
+    int inode_number = find_inode(path);
+    if (inode_number == -1) {
+        return (file_pointer) {-1, -1}; // File not found
+    }
+    int block_number = allocate_block();
+    if (block_number == -1) {
+        return (file_pointer) {-1, -1}; // No free blocks available
+    }
+    inodes[inode_number].blocks[block_number / 2] = block_number;
+    return (file_pointer) {block_number, 0};
+}
+
+void close_file(file_pointer fp) {
+    free_block(fp.block_number);
+}
+
+int read_file(file_pointer fp, char* buffer, int length) {
+    if (fp.block_number == -1) {
+        return -1; // File not found
+    }
+    int bytes_read = 0;
+    while (bytes_read < length) {
+        if (fp.offset == BLOCK_SIZE) {
+            // Move to the next block
+            int block_number = inodes[fp.block_number].blocks[fp.offset / BLOCK_SIZE];
+            if (block_number == -1) {
+                break; // End of file
+            }
+            fp.block_number = block_number;
+            fp.offset = 0;
+        }
+        buffer[bytes_read++] = blocks[fp.block_number].data[fp.offset++];
+    }
+    return bytes_read;
+}
+
+int write_file(file_pointer fp, char* buffer, int length) {
+    if (fp.block_number == -1) {
+        return -1; // File not found
+    }
+    int bytes_written = 0;
+    while (bytes_written < length) {
+        if (fp.offset == BLOCK_SIZE) {
+            // Move to the next block
+            int block_number = inodes[fp.block_number].blocks[fp.offset / BLOCK_SIZE];
+            if (block_number == -1) {
+                // Allocate a new block
+                block_number = allocate_block();
+                if (block_number == -1) {
+                    return bytes_written; // No free blocks available
+                }
+                inodes[fp.block_number].blocks[fp.offset / BLOCK_SIZE] = block_number;
+            }
+            fp.block_number = block_number;
+            fp.offset = 0;
+        }
+        blocks[fp.block_number].data[fp.offset++] = buffer[bytes_written++];
+    }
+    if (inodes[fp.block_number].size < fp.offset) {
+        inodes[fp.block_number].size = fp.offset;
+    }
+    return bytes_written;
+}
+
+int create_file(char* path) {
+    int inode_number = find_inode(path);
+    if (inode_number != -1) {
+        return -1; // File already exists
+    }
+    for (int i = 1; i < NUM_INODES; i++) {
+        if (inodes[i].name[0] == '\0') {
+            strcpy(inodes[i].name, path);
+            inodes[i].size = 0;
+            for (int j = 0; j < NUM_BLOCKS / 2; j++) {
+                inodes[i].blocks[j] = -1;
+            }
+            return 0; // File created successfully
+        }
+    }
+    return -1; // No free inodes available
+}
+
+int delete_file(char* path) {
+    int inode_number = find_inode(path);
+    if (inode_number == -1) {
+        return -1; // File not found
+    }
+    for (int i = 0; i < NUM_BLOCKS / 2; i++) {
+        int block_number = inodes[inode_number].blocks[i];
+        if (block_number != -1) {
+            free_block(block_number);
+        }
+    }
+    inodes[inode_number].name[0] = '\0';
+    inodes[inode_number].size = 0;
+    for (int i = 0; i < NUM_BLOCKS / 2; i++) {
+        inodes[inode_number].blocks[i] = -1;
+    }
+    return 0; // File deleted successfully
+}
 
 void print_string(char* str) {
-    char* video_memory = (char*) 0x8000;
+    char* video_memory = (char*) 0xB8000;
     while (*str != '\0') {
         *video_memory++ = *str++;
         *video_memory++ = 0x0F; // Set the text color to white on black
@@ -20,9 +177,8 @@ void print_string(char* str) {
 }
 
 void halt() {
-    asm("mov $0x00, %ah");
-    asm("mov $0x03, %al");
-    asm("int $0x10");
+    asm("cli");
+    asm("hlt");
 }
 
 void int_handler() {
@@ -64,19 +220,34 @@ void sys_call() {
 }
 
 void add_to_history(char* command) {
-    if (history_index == MAX_HISTORY_LENGTH) {
-        free(history[0]);
-        for (int i = 0; i < MAX_HISTORY_LENGTH - 1; i++) {
-            history[i] = history[i+1];
-        }
-        history_index--;
-    }
-    history[history_index++] = strdup(command);
+    // TODO: Implement command history
 }
 
 void print_history() {
-    for (int i = 0; i < history_index; i++) {
-        printf("%d: %s\n", i+1, history[i]);
+    // TODO: Implement command history
+}
+
+void idle_task() {
+    while (1) {
+        // Do nothing
+    }
+}
+
+void task1() {
+    while (1) {
+        print_string("\nTask 1 running...");
+    }
+}
+
+void task2() {
+    while (1) {
+        print_string("\nTask 2 running...");
+    }
+}
+
+void task3() {
+    while (1) {
+        print_string("\nTask 3 running...");
     }
 }
 
@@ -85,77 +256,22 @@ void start() {
     asm("mov $0x0000, %ax");
     asm("mov %ax, %ds");
 
-    // Authenticate the user
-    char input_username[MAX_USERNAME_LENGTH];
-    char input_password[MAX_PASSWORD_LENGTH];
-    do {
-        print_string("Username: ");
-        asm("mov $0x0A, %ah");
-        asm("int $0x10");
-        asm("mov $0x00, %ah");
-        asm("int $0x16");
-        asm("mov %al, %bl");
-        asm("mov $0x0A, %ah");
-        asm("int $0x10");
-        asm("mov $0x00, %ah");
-        asm("int $0x16");
-        asm("mov %al, %cl");
-        asm("mov $'*', %al");
-        asm("int $0x10");
-        asm("mov $0x00, %ah");
-        asm("int $0x16");
-        asm("mov %al, %dl");
-        asm("cmp %bl, %cl");
-        asm("jne .not_equal");
-        asm("cmp %bl, %dl");
-        asm("jne .not_equal");
-        asm("jmp .equal");
-        asm(".not_equal:");
-        asm("mov $0x0A, %ah");
-        asm("int $0x10");
-        asm("mov $0x0D, %ah");
-        asm("int $0x10");
-        asm("jmp .retry");
-        asm(".equal:");
-        asm("mov $0x0A, %ah");
-        asm("int $0x10");
-        asm("mov $0x0D, %ah");
-        asm("int $0x10");
-        asm("jmp .authenticated");
-        asm(".retry:");
-    } while (1);
-
-    asm(".authenticated:");
+    // Initialize the filesystem
+    initialize_filesystem();
 
     // Print the welcome message
-    print_string("Welcome to the command line interface!");
+    print_string("Welcome to Kernel16F!");
+
+    // Initialize the task list
+    void (*tasks[])() = {idle_task, task1, task2, task3};
+    int num_tasks = sizeof(tasks) / sizeof(tasks[0]);
+    int current_task = 0;
 
     // Loop to accept user commands
     while (1) {
-        char command[MAX_COMMAND_LENGTH];
+        char command[MAX_FILENAME_LENGTH];
         print_string("\nEnter a command: ");
-        asm("mov $0x0A, %ah");
-        asm("int $0x10");
-        asm("mov $0x00, %ah");
-        asm("int $0x16");
-        asm("mov %al, %bl");
-        asm("mov $0x0A, %ah");
-        asm("int $0x10");
-        asm("mov $0x00, %ah");
-        asm("int $0x16");
-        asm("mov %al, %cl");
-        asm("mov $'*', %al");
-        asm("int $0x10");
-        asm("mov $0x00, %ah");
-        asm("int $0x16");
-        asm("mov %al, %dl");
-        asm("cmp $0x0D, %dl");
-        asm("je .end");
-        asm("mov %al, (%si)");
-        asm("inc %si");
-        asm("jmp .loop");
-        asm(".end:");
-        asm("mov $0x00, (%si)");
+        scanf("%s", command);
 
         // Add the command to the history
         add_to_history(command);
@@ -174,108 +290,58 @@ void start() {
             // TODO: Implement directory creation
         } else if (strcmp(command, "touch") == 0) {
             // Create a new file
-            print_string("\nCreating file...");
-            // TODO: Implement file creation
+            char filename[MAX_FILENAME_LENGTH];
+            print_string("\nEnter filename: ");
+            scanf("%s", filename);
+            if (create_file(filename) == 0) {
+                print_string("\nFile created successfully.");
+            } else {
+                print_string("\nError creating file.");
+            }
         } else if (strcmp(command, "rm") == 0) {
             // Delete a file
-            print_string("\nDeleting file...");
-            // TODO: Implement file deletion
-        } else if (strcmp(command, "rmdir") == 0) {
-            // Delete a directory
-            print_string("\nDeleting directory...");
-            // TODO: Implement directory deletion
+            char filename[MAX_FILENAME_LENGTH];
+            print_string("\nEnter filename: ");
+            scanf("%s", filename);
+            if (delete_file(filename) == 0) {
+                print_string("\nFile deleted successfully.");
+            } else {
+                print_string("\nError deleting file.");
+            }
         } else if (strcmp(command, "cat") == 0) {
             // Print the contents of a file
-            char filename[MAX_COMMAND_LENGTH];
+            char filename[MAX_FILENAME_LENGTH];
             print_string("\nEnter filename: ");
-            asm("mov $0x0A, %ah");
-            asm("int $0x10");
-            asm("mov $0x00, %ah");
-            asm("int $0x16");
-            asm("mov %al, %bl");
-            asm("mov $0x0A, %ah");
-            asm("int $0x10");
-            asm("mov $0x00, %ah");
-            asm("int $0x16");
-            asm("mov %al, %cl");
-            asm("mov $'*', %al");
-            asm("int $0x10");
-            asm("mov $0x00, %ah");
-            asm("int $0x16");
-            asm("mov %al, %dl");
-            asm("cmp $0x0D, %dl");
-            asm("je .end_cat");
-            asm("mov %al, (%si)");
-            asm("inc %si");
-            asm("jmp .loop_cat");
-            asm(".end_cat:");
-            asm("mov $0x00, (%si)");
-            FILE* file = fopen(filename, "r");
-            if (file == NULL) {
+            scanf("%s", filename);
+            file_pointer fp = open_file(filename);
+            if (fp.block_number == -1) {
                 print_string("\nFile not found.");
             } else {
-                char line[MAX_COMMAND_LENGTH];
-                while (fgets(line, MAX_COMMAND_LENGTH, file) != NULL) {
-                    printf("%s", line);
-                }
-                fclose(file);
+                char buffer[MAX_FILE_SIZE];
+                int bytes_read = read_file(fp, buffer, MAX_FILE_SIZE);
+                buffer[bytes_read] = '\0';
+                printf("%s", buffer);
+                close_file(fp);
             }
         } else if (strcmp(command, "echo") == 0) {
             // Write a string to a file
-            char filename[MAX_COMMAND_LENGTH];
+            char filename[MAX_FILENAME_LENGTH];
             print_string("\nEnter filename: ");
-            asm("mov $0x0A, %ah");
-            asm("int $0x10");
-            asm("mov $0x00, %ah");
-            asm("int $0x16");
-            asm("mov %al, %bl");
-            asm("mov $0x0A, %ah");
-            asm("int $0x10");
-            asm("mov $0x00, %ah");
-            asm("int $0x16");
-            asm("mov %al, %cl");
-            asm("mov $'*', %al");
-            asm("int $0x10");
-            asm("mov $0x00, %ah");
-            asm("int $0x16");
-            asm("mov %al, %dl");
-            asm("cmp $0x0D, %dl");
-            asm("je .end_echo_filename");
-            asm("mov %al, (%si)");
-            asm("inc %si");
-            asm("jmp .loop_echo_filename");
-            asm(".end_echo_filename:");
-            asm("mov $0x00, (%si)");
-            char text[MAX_COMMAND_LENGTH];
+            scanf("%s", filename);
+            char text[MAX_FILE_SIZE];
             print_string("\nEnter text: ");
-            asm("mov $0x0A, %ah");
-            asm("int $0x10");
-            asm("mov $0x00, %ah");
-            asm("int $0x16");
-            asm("mov %al, %bl");
-            asm("mov $0x0A, %ah");
-            asm("int $0x10");
-            asm("mov $0x00, %ah");
-            asm("int $0x16");
-            asm("mov %al, %cl");
-            asm("mov $'*', %al");
-            asm("int $0x10");
-            asm("mov $0x00, %ah");
-            asm("int $0x16");
-            asm("mov %al, %dl");
-            asm("cmp $0x0D, %dl");
-            asm("je .end_echo_text");
-            asm("mov %al, (%si)");
-            asm("inc %si");
-            asm("jmp .loop_echo_text");
-            asm(".end_echo_text:");
-            asm("mov $0x00, (%si)");
-            FILE* file = fopen(filename, "w");
-            if (file == NULL) {
-                print_string("\nError creating file.");
+            scanf("%s", text);
+            file_pointer fp = open_file(filename);
+            if (fp.block_number == -1) {
+                print_string("\nError opening file.");
             } else {
-                fprintf(file, "%s", text);
-                fclose(file);
+                int bytes_written = write_file(fp, text, strlen(text));
+                if (bytes_written == strlen(text)) {
+                    print_string("\nText written to file.");
+                } else {
+                    print_string("\nError writing to file.");
+                }
+                close_file(fp);
             }
         } else if (strcmp(command, "history") == 0) {
             // Print the command history
@@ -289,5 +355,9 @@ void start() {
             print_string("\nUnknown command: ");
             print_string(command);
         }
+
+        // Switch to the next task
+        current_task = (current_task + 1) % num_tasks;
+        tasks[current_task]();
     }
 }

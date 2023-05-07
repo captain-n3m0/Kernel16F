@@ -1,7 +1,4 @@
 #include <stdint.h>
-#include "sys/io.h"
-
-#define outb(value, port) outb((unsigned char)value, port)
 
 // Define the I/O ports for reading from and writing to the VGA text buffer
 #define VGA_PORT_DATA 0x3D5

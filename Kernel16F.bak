@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <string.h>
 #include "io.h"
-/*
+
 // Define the VGA text buffer
 static uint16_t* const VGA_BUFFER = (uint16_t*)0xB8000;
 static const size_t VGA_WIDTH = 80;
@@ -13,7 +13,7 @@ static const size_t VGA_HEIGHT = 25;
 // Define the colors for the VGA text buffer
 static const uint8_t VGA_COLOR_BLACK = 0;
 static const uint8_t VGA_COLOR_WHITE = 15;
-*/
+
 // Define a struct for the VGA text buffer cursor
 struct vga_cursor {
     size_t row;

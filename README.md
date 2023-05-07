@@ -4,6 +4,7 @@ Kernel16F is a simple operating system kernel written in x86 assembly and C. It 
 ## Contributors
 
 [@Abhrankan-Chakrabarti](https://github.com/Abhrankan-Chakrabarti)
+[@captain-n3m0](https://github.com/captain-n3m0)
 
 ## Getting Started
 

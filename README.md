@@ -1,6 +1,9 @@
 # Kernel16F
 
 Kernel16F is a simple operating system kernel written in x86 assembly and C. It is designed to run on 16-bit x86 processors and provides basic functionality such as keyboard input, screen output, and memory management.
+## Contributors
+
+[@Abhrankan-Chakrabarti](https://github.com/Abhrankan-Chakrabarti)
 
 ## Getting Started
 

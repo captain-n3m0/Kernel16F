@@ -1,8 +1,8 @@
 #ifndef FILESYSTEM_H
 #define FILESYSTEM_H
 
-#include <stdio.h>
-#include "/disk_operations/disk.h"
+#include "../headers/stdio.h"
+#include "../disk_operations/disk.h"
 
 typedef void* (*FS_OPEN_FUNCTION)(struct disk* disk, char* filename, char mode);
 typedef int (*FS_RESOLVE_FUNCTION)(struct disk* disk);

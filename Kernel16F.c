@@ -45,8 +45,8 @@ void main()
 
 void panic(char *message)
 {
-    print("!!!KERNEL PANIC!!!: ");
-    print(message);
+    printf("!!!KERNEL PANIC!!!: ");
+    printf(message);
     while (1)
     {
     }

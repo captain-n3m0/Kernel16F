@@ -1,11 +1,12 @@
-#include "file.h"
-#include "config.h"
-#include "kernel.h"
-#include "memory/memory.h"
-#include "fat16/fat16.h"
-#include "disk_operations/disk.h"
-#include "string_manipulation/string.h"
-#include "status.h"
+#include "filesystem.h"
+#include "../config.h"
+#include "../Kernel16F.h"
+#include "../memory_manager/mem_manager.h"
+#include "../fat16/fat16fs.h"
+#include "../disk_operations/disk.h"
+#include "../string_manipulation/string_utils.h"
+#include "../status.h"
+#include "../headers/stdlib.h"
 
 #define MAX_FILESYSTEMS 10
 struct filesystem *filesystems[MAX_FILESYSTEMS];

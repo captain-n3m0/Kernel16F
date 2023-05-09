@@ -1,9 +1,10 @@
-#include "fat16fs.h"
+#include "../headers/stdio.h"
+#include "../fat16/fat16fs.h"
 #include "memory_manager/mem_manager.h"
 #include "string_manipulation/string_utils.h"
-#include "status.h"
-#include "config.h"
-#include "disk_operations/disk.h"
+#include "../Kernel16F/status.h"
+#include "../Kernel16F/config.h"
+#include "../disk_operations/disk.h"
 
 struct fat_header_extended
 {

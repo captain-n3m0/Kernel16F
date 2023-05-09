@@ -1,8 +1,8 @@
+#include "../headers/stdio.h"
 #include "disk.h"
 #include "config.h"
-#include "memory_manager.h"
-#include "kernel.h"
-#include "memory/kheap.h"
+#include "../memory_manager/mem_manager.h"
+#include "Kernel16F.h"
 
 static struct disk disks[Kernel16F_MAX_DISKS];
 static int num_disks = 0;

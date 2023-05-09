@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include "../headers/stdio.h"
 #include "display.h"
 
 void display_init() {

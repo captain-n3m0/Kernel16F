@@ -21,6 +21,6 @@ rad.json
 #Test results file
 TestResults.xml
 #DS-Store
-.DS_Store/
+.DS_Store
 #.o files
 *.o

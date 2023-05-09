@@ -1,11 +1,11 @@
 #include "Kernel16F.h"
-#include "../display/display.h"
-#include "../filesystem/filesystem.h"
-#include "../disk_operations/disk.h"
-#include "../memory_manager/mem_manager.h"
-#include "../string_manipulation/string_utils.h"
-#include "../process_manager/proc_man.h"
-#include "../cli_interface/cli.h"
+#include "display/display.h"
+#include "filesystem/filesystem.h"
+#include "disk_operations/disk.h"
+#include "memory_manager/mem_manager.h"
+#include "string_manipulation/string_utils.h"
+#include "process_manager/proc_man.h"
+#include "cli_interface/cli.h"
 void main()
 {
     // Create the kernels heap

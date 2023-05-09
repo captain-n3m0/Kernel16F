@@ -2,9 +2,9 @@
 #include "config.h"
 #include "kernel.h"
 #include "memory/memory.h"
-#include "fat/fat16.h"
+#include "fat16/fat16.h"
 #include "disk_operations/disk.h"
-#include "string/string.h"
+#include "string_manipulation/string.h"
 #include "status.h"
 
 #define MAX_FILESYSTEMS 10

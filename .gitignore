@@ -24,3 +24,5 @@ TestResults.xml
 .DS_Store
 #.o files
 *.o
+#.bak files
+*.bak

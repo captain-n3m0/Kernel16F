@@ -1,7 +1,7 @@
 #ifndef DISK_H
 #define DISK_H
 
-#include "filesystem/filesystem.h"
+#include "../filesystem/filesystem.h"
 
 typedef enum {
     Kernel16F_DISK_TYPE_REAL = 0,

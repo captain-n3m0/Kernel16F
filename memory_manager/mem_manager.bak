@@ -1,7 +1,7 @@
 #ifndef MEM_MANAGER_H
 #define MEM_MANAGER_H
 
-#include "../headers/stddef.h"
+#include <stddef.h>
 
 /* Initialize the memory manager */
 void init_memory_manager(size_t total_size);

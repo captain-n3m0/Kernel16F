@@ -1,7 +1,7 @@
 #ifndef STRING_UTILS_H
 #define STRING_UTILS_H
 
-#include "../headers/stddef.h"
+#include <stddef.h>
 
 /**
  * Copies up to `n` characters from `src` to `dest`, padding with null characters if necessary.

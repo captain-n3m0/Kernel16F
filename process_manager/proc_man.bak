@@ -1,9 +1,9 @@
 #ifndef PROC_MAN_H
 #define PROC_MAN_H
 
-#include "../headers/stdbool.h"
-#include "../headers/stddef.h"
-#include "../headers/stdint.h"
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #define MAX_PROCESSES 1024
 

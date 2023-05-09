@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "cli.h"
-#include "display.h"
+#include "display/display.h"
 
 void echo(char* args[]) {
     char output[100] = "";

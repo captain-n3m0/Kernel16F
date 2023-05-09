@@ -30,7 +30,7 @@ void version(char* args[]) {
 
 void cli_init() {
     display_init();
-}
+    display_write("Welcome to Kernel16F Command Line!\n");
 
 void cli_parse_input(char* input_str) {
     char* args[10];

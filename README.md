@@ -3,8 +3,8 @@
 Kernel16F is a simple operating system kernel written in x86 assembly and C. It is designed to run on 16-bit x86 processors and provides basic functionality such as keyboard input, screen output, and memory management.
 ## Contributors
 
-[@Abhrankan-Chakrabarti](https://github.com/Abhrankan-Chakrabarti)
 [@captain-n3m0](https://github.com/captain-n3m0)
+[@Abhrankan-Chakrabarti](https://github.com/Abhrankan-Chakrabarti)
 
 ## Getting Started
 
@@ -12,7 +12,7 @@ To build and run Kernel16F, you will need a 16-bit x86 processor emulator such a
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/captain-n3m0/Kernel16F.git 
+git clone https://github.com/captain-n3m0/Kernel16F.git
 ```
 
 2. Install the cross-compiler:

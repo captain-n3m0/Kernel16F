@@ -1,6 +1,6 @@
 #include "mem_manager.h"
-#include <stdlib.h>
-#include <string.h>
+#include "../headers/stdlib.h"
+#include "../string_manipulation/string_utils.h"
 
 /* Define the heap and kheap */
 static void* heap;

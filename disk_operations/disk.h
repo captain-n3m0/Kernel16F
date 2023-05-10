@@ -4,8 +4,8 @@
 #include "../filesystem/filesystem.h"
 
 typedef enum {
-    Kernel16F_DISK_TYPE_REAL = 0,
-} Kernel16F_DISK_TYPE;
+    KERNEL16F_DISK_TYPE_REAL = 0,
+} KERNEL16F_DISK_TYPE;
 
 struct real_disk {
     int bios_id;
@@ -14,7 +14,7 @@ struct real_disk {
 };
 
 struct disk {
-    Kernel16F_DISK_TYPE type;
+    KERNEL16F_DISK_TYPE type;
     struct filesystem *filesystem;
     union {
         struct real_disk real;

@@ -4,7 +4,7 @@
 #include "../memory_manager/mem_manager.h"
 #include "../fat16/fat16fs.h"
 #include "../disk_operations/disk.h"
-#include "../string_manipulation/string_utils.h"
+#include "../string/string.h"
 #include "../status.h"
 #include "../headers/stdlib.h"
 #include "../headers/stdio.h"

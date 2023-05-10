@@ -1,5 +1,5 @@
-#ifndef STRING_UTILS_H
-#define STRING_UTILS_H
+#ifndef STRING_H
+#define STRING_H
 
 #include "../headers/stddef.h"
 

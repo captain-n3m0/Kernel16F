@@ -2,9 +2,10 @@
 #include "disk.h"
 #include "config.h"
 #include "../memory_manager/mem_manager.h"
-#include "Kernel16F.h"
+#include "KERNEL16F.h"
+#include "../string/string.h"
 
-static struct disk disks[Kernel16F_MAX_DISKS];
+static struct disk disks[KERNEL16F_MAX_DISKS];
 static int num_disks = 0;
 
 extern int disk_reset(int drive_number);
@@ -20,7 +21,7 @@ static void locate_disk(int bios_drive_id)
 
         // Ok this disk exists lets set it all up
         struct disk *disk = &disks[0];
-        disk->type = Kernel16F_DISK_TYPE_REAL;
+        disk->type = KERNEL16F_DISK_TYPE_REAL;
         disk->shared.real.bios_id = bios_drive_id;
 
         if (disk_get_details(bios_drive_id, &total_heads, &sectors_per_track))
@@ -52,8 +53,8 @@ static int is_disk_registered(int index)
 {
     struct disk empty_disk;
     memset(&empty_disk, 0, sizeof(empty_disk));
-    return index < Kernel16F_MAX_DISKS &&
-           memcmp(&disks[index], &empty_disk, sizeof(disks[index])) != 0;
+    return index < KERNEL16F_MAX_DISKS &&
+        memcmp(&disks[index], &empty_disk, sizeof(disks[index])) != 0;
 }
 
 struct disk *get_disk(int index)

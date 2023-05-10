@@ -1,11 +1,12 @@
 #include "../headers/stdio.h"
-#include "../fat16/fat16fs.h"
-#include "memory_manager/mem_manager.h"
-#include "string_manipulation/string_utils.h"
+#include "fat16fs.h"
+#include "../memory_manager/mem_manager.h"
+#include "../string_manipulation/string_utils.h"
 #include "../Kernel16F/status.h"
 #include "../Kernel16F/config.h"
 #include "../disk_operations/disk.h"
-
+#include <stdint.h>
+#include <stddef.h>
 struct fat_header_extended
 {
     uint8_t drive_number;
@@ -55,14 +56,14 @@ static int fat16_resolve(struct disk* disk)
 
     if (!disk_read_block(disk, 0, &fat_private->header))
     {
-        res = -Kernel16F_FS_NOT_US;
+        res = -KERNEL16F_FS_NOT_US;
         goto out;
     }
 
     struct fat_h* header = &fat_private->header;
-    if (header->shared.extended_header.signature != Kernel16F_FAT16_SIGNATURE)
+    if (header->shared.extended_header.signature != KERNEL16F_FAT16_SIGNATURE)
     {
-        res = -Kernel16F_FS_NOT_US;
+        res = -KERNEL16F_FS_NOT_US;
         goto out;
     }
 
@@ -94,12 +95,12 @@ static void* fat16_open(struct disk* disk, char* filename, char mode)
     // Read-only filesystem
     if (mode != 'r')
     {
-        return (void*)-Kernel16F_FS_FILE_READ_ONLY_ERROR;
+        return (void*)-KERNEL16F_FS_FILE_READ_ONLY_ERROR;
     }
 
     fat16_get_root_directory(disk);
 
-    return (void*)Kernel16F_ALL_OK;
+    return (void*)KERNEL16F_ALL_OK;
 }
 
 struct filesystem* fat16_init()

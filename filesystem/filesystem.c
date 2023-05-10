@@ -7,6 +7,8 @@
 #include "../string_manipulation/string_utils.h"
 #include "../status.h"
 #include "../headers/stdlib.h"
+#include "../headers/stdio.h"
+#include "../headers/stddef.h"
 
 #define MAX_FILESYSTEMS 10
 struct filesystem *filesystems[MAX_FILESYSTEMS];
@@ -38,9 +40,9 @@ void fs_insert_filesystem(struct filesystem *filesystem)
     }
 
     *fs = filesystem;
-    print("Filesystem ");
-    print(filesystem->name);
-    print(" initialized.\n");
+    printf("Filesystem ");
+    printf(filesystem->name);
+    printf(" initialized.\n");
 }
 
 /**
@@ -72,16 +74,16 @@ void fs_load()
  */
 static int fs_valid_path_format(char *filename)
 {
-    int len = strnlen(filename, Kernel16F_MAX_PATH);
+    int len = strnlen(filename, KERNEL16F_MAX_PATH);
     return len >= 3 && isdigit(filename[0]) && memcmp(&filename[1], ":/", 2) == 0;
 }
 
 static int fs_get_drive_by_path(char *filename)
 {
-    int len = strnlen(filename, Kernel16F_MAX_PATH);
+    int len = strnlen(filename, KERNEL16F_MAX_PATH);
     if (!fs_valid_path_format(filename))
     {
-        return -Kernel16F_BAD_PATH;
+        return -KERNEL16F_BAD_PATH;
     }
 
     return tonumericdigit(filename[0]);
@@ -99,7 +101,7 @@ int fopen(char *filename, char mode)
     struct disk *disk = disk_get(drive_no);
     if (!disk)
     {
-        return -Kernel16F_INVALID_DRIVE;
+        return -KERNEL16F_INVALID_DRIVE;
     }
 
     return filesystems[0]->open(disk, start_of_relative_path, mode);

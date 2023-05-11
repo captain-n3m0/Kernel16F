@@ -3,7 +3,7 @@
 
 #include "../headers/stdio.h"
 #include "../disk_operations/disk.h"
-
+#include "../string/string.h"
 typedef void* (*FS_OPEN_FUNCTION)(struct disk* disk, char* filename, char mode);
 typedef int (*FS_RESOLVE_FUNCTION)(struct disk* disk);
 

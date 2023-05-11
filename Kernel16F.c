@@ -3,7 +3,7 @@
 #include "filesystem/filesystem.h"
 #include "disk_operations/disk.h"
 #include "memory_manager/mem_manager.h"
-#include "string_manipulation/string_utils.h"
+#include "string/string.h"
 #include "process_manager/proc_man.h"
 #include "cli_interface/cli.h"
 void main()

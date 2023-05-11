@@ -26,6 +26,8 @@ void main()
     // Initialise the CLI
     cli_init();
 
+    // Initialise the keyboard
+    keyboard_init();
 
     {
         int f = fopen("0:/START", 'r');

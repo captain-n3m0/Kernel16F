@@ -80,7 +80,7 @@ static int fs_valid_path_format(char *filename)
 
 static int fs_get_drive_by_path(char *filename)
 {
-    int len = strnlen(filename, KERNEL16F_MAX_PATH);
+   // int len = strnlen(filename, KERNEL16F_MAX_PATH);
     if (!fs_valid_path_format(filename))
     {
         return -KERNEL16F_BAD_PATH;
@@ -104,7 +104,7 @@ int fopen(char *filename, char mode)
         return -KERNEL16F_INVALID_DRIVE;
     }
 
-    return filesystems[0]->open(disk, start_of_relative_path, mode);
+    return *(int*)filesystems[0]->open(disk, start_of_relative_path, mode);
 }
 
 struct filesystem *fs_resolve(struct disk *disk)

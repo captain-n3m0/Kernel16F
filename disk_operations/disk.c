@@ -1,8 +1,8 @@
 #include "../headers/stdio.h"
 #include "disk.h"
-#include "config.h"
+#include "../config.h"
 #include "../memory_manager/mem_manager.h"
-#include "KERNEL16F.h"
+#include "../Kernel16F.h"
 #include "../string/string.h"
 
 static struct disk disks[KERNEL16F_MAX_DISKS];

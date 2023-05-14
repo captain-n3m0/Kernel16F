@@ -1,7 +1,7 @@
 #ifndef KEYBOARD_H
 #define KEYBOARD_H
 
-#include <stdint.h>
+#include "../headers/stdint.h"
 
 // Initialize the keyboard driver
 void keyboard_init();

@@ -1,6 +1,6 @@
 #include "proc_man.h"
-#include <stdlib.h>
-#include <string.h>
+#include "../headers/stdlib.h"
+#include "../string/string.h"
 
 static process_t processes[MAX_PROCESSES];
 static uint32_t next_pid = 1;

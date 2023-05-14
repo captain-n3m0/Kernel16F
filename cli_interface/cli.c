@@ -1,7 +1,7 @@
-#include <stdio.h>
-#include <string.h>
+#include "../headers/stdio.h"
+#include "../string/string.h"
 #include "cli.h"
-#include "display/display.h"
+#include "../display/display.h"
 
 void echo(char* args[]) {
     char output[100] = "";
@@ -31,7 +31,7 @@ void version(char* args[]) {
 void cli_init() {
     display_init();
     display_write("Welcome to Kernel16F Command Line!\n");
-
+}
 void cli_parse_input(char* input_str) {
     char* args[10];
     char* token = strtok(input_str, " ");

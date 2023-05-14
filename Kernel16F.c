@@ -6,6 +6,7 @@
 #include "string/string.h"
 #include "process_manager/proc_man.h"
 #include "cli_interface/cli.h"
+#include "drivers/keyboard_driver.h"
 void main()
 {
     // Create the kernels heap

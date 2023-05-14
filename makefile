@@ -2,7 +2,7 @@
 CC = gcc
 LD = ld
 CFLAGS = -m32 -ffreestanding -nostdlib -fno-builtin -fno-stack-protector -Wall -Wextra -Werror -Iinclude
-LDFLAGS = -e _start
+LDFLAGS = -arch x86_64 -e _start
 
 # Source files
 SRCS = Kernel16F.c display/display.c filesystem/filesystem.c disk_operations/disk.c memory_manager/mem_manager.c string/string.c process_manager/proc_man.c cli_interface/cli.c

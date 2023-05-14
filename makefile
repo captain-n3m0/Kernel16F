@@ -1,8 +1,8 @@
 # Compiler and linker options
 CC = gcc
 LD = ld
-CFLAGS = -m16 -ffreestanding -Wall -Wextra -nostdlib -nostdinc -fno-builtin -fno-stack-protector
-LDFLAGS = -T Kernel16F.ld -melf_i386
+CFLAGS = -m32 -ffreestanding -nostdlib -fno-builtin -fno-stack-protector -Wall -Wextra -Werror -Iinclude
+LDFLAGS = -e _start
 
 # Source files
 SRCS = Kernel16F.c display/display.c filesystem/filesystem.c disk_operations/disk.c memory_manager/mem_manager.c string/string.c process_manager/proc_man.c cli_interface/cli.c

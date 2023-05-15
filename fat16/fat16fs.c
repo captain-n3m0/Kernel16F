@@ -5,8 +5,8 @@
 #include "../status.h"
 #include "../config.h"
 #include "../disk_operations/disk.h"
-#include <stdint.h>
-#include <stddef.h>
+#include "../headers/stdint.h"
+#include "../headers/stddef.h"
 
 struct fat_header_extended
 {

@@ -46,6 +46,10 @@ all: ./bin/boot.bin ./bin/Kernel16F.bin
 ./bin/Kernel16F.bin: ${OBJECTS}
 	$(LD) -d -M ${OBJECTS} -L/usr/lib/bcc/ -lc -o ./bin/Kernel16F.bin
 
+./build/cli.o: ./src/cli_interface/cli.c ./src/cli_interface/cli.h
+	$(CC) $(CFLAGS) -I./src/cli_interface $(SRC)/cli_interface/cli_interface.c -o ./build/cli_interface/cli.o
+
+
 clean:
 	rm -f ./bin/boot.bin
 	rm -f ./bin/Kernel16F.bin

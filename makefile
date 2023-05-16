@@ -49,7 +49,8 @@ all: ./bin/boot.bin ./bin/Kernel16F.bin
 ./build/cli.o: ./src/cli_interface/cli.c ./src/cli_interface/cli.h
 	$(CC) $(CFLAGS) -I./src/cli_interface $(SRC)/cli_interface/cli_interface.c -o ./build/cli_interface/cli.o
 
-
+./build/process_manager/proc_man.o: ./src/process_manager/proc_man.c ./src/process_manager/proc_man.h
+	$(CC) $(CFLAGS) -I./src/process_manager $(SRC)/process_manager/proc_man.c -o ./build/process_manager/proc_man.o
 clean:
 	rm -f ./bin/boot.bin
 	rm -f ./bin/Kernel16F.bin

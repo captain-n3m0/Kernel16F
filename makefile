@@ -1,11 +1,11 @@
 AS=nasm
-CC=bcc
+CC=gcc
 LD=ld86
 INC=./src
 SRC=./src
 OBJECTS= ./build/Kernel16F.o ./build/disk/disk.o ./build/disk/diskasm.o ./build/display.o ./build/displayasm.o ./build/memory/memory.o ./build/memory/heap.o ./build/memory/kheap.o ./build/string/string.o  ./build/fs/file.o ./build/fs/fat/fat16.o
 INC=./src
-CFLAGS=-0 -I$(INC) -ansi -c
+CFLAGS= -O -I$(INC) -ansi -c
 
 all: ./bin/boot.bin ./bin/Kernel16F.bin
 	rm -f ./bin/os.bin

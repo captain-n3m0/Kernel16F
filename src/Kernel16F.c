@@ -7,7 +7,7 @@
 #include "process_manager/proc_man.h"
 #include "cli_interface/cli.h"
 #include "drivers/keyboard_driver.h"
-void main()
+int main()
 {
     // Create the kernels heap
     init_memory_manager(4 * 1024 * 1024);

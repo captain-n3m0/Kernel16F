@@ -1,4 +1,5 @@
-BITS 16]
+%include "constants.asm"
+[BITS 16]
 global _disk_reset
 global _disk_read_sector
 global _disk_get_disk_details

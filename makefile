@@ -3,7 +3,7 @@ CC=gcc
 LD=ld86
 INC=./src
 SRC=./src
-OBJECTS= ./build/Kernel16F.o ./build/disk/disk.o ./build/disk/diskasm.o ./build/display.o ./build/displayasm.o ./build/memory/memory.o ./build/memory/heap.o ./build/memory/kheap.o ./build/string/string.o  ./build/fs/file.o ./build/fs/fat/fat16.o
+OBJECTS= ./build/Kernel16F.o ./build/disk/disk.o ./build/disk_operations/diskasm.o ./build/display.o ./build/displayasm.o ./build/memory/memory.o ./build/memory/heap.o ./build/memory/kheap.o ./build/string/string.o  ./build/fs/file.o ./build/fs/fat/fat16.o
 INC=./src
 CFLAGS= -O -I$(INC) -ansi -c
 
@@ -31,8 +31,11 @@ all: ./bin/boot.bin ./bin/Kernel16F.bin
 ./build/displayasm.o: ./src/display/display.asm
 	nasm -f as86 ./src/display/display.asm -o ./build/displayasm.o
 
-./build/memory_manager/mem_manager.o: ./src/memory_manager/mem_manager.c ./src/memory_manager/mem_manager.h
-	$(CC) $(CFLAGS) -I./src/memory_manager $(SRC)/memory_manager/mem_manager.c -o ./build/memory_manager/mem_manager.o
+./build/memory/memory.o: ./src/memory/memory.c ./src/memory/memory.h
+	$(CC) $(CFLAGS) -I./src/memory $(SRC)/memory/memory.c -o ./build/memory/memory.o
+
+./build/memory/heap.o: ./src/memory/heap.c ./src/memory/heap.h
+	$(CC) $(CFLAGS) -I./src/memory $(SRC)/memory/heap.c -o ./build/memory/heap.o
 
 ./build/string/string.o: ./src/string/string.c ./src/string/string.h
 	$(CC) $(CFLAGS) -I./src/string $(SRC)/string/string.c -o ./build/string/string.o
@@ -40,17 +43,18 @@ all: ./bin/boot.bin ./bin/Kernel16F.bin
 ./build/filesystem/filesystem.o: ./src/filesystem/filesystem.c ./src/filesystem/filesystem.h
 	$(CC) $(CFLAGS) -I./src/filesystem $(SRC)/filesystem/filesystem.c -o ./build/filesystem/filesystem.o
 
-./build/fat16/fat16fs.o: ./src/fat16/fat16fs.c ./src/fat16/fat16fs.h
-	$(CC) $(CFLAGS) -I./src/fat16 $(SRC)/fat16/fat16fs.c -o ./build/fat16/fat16fs.o
+./build/fat/fat16fs.o: ./src/fat/fat16fs.c ./src/fat/fat16fs.h
+	$(CC) $(CFLAGS) -I./src/fat $(SRC)/fat/fat16fs.c -o ./build/fat/fat16fs.o
 
 ./bin/Kernel16F.bin: ${OBJECTS}
-	$(LD) -d -M ${OBJECTS} -L/usr/lib/bcc/ -lc -o ./bin/Kernel16F.bin
+	$(LD) -d -M ${OBJECTS} -L/usr/lib/bcc/ -lc - ./bin/Kernel16F.bin
 
 ./build/cli.o: ./src/cli_interface/cli.c ./src/cli_interface/cli.h
 	$(CC) $(CFLAGS) -I./src/cli_interface $(SRC)/cli_interface/cli_interface.c -o ./build/cli_interface/cli.o
 
 ./build/process_manager/proc_man.o: ./src/process_manager/proc_man.c ./src/process_manager/proc_man.h
 	$(CC) $(CFLAGS) -I./src/process_manager $(SRC)/process_manager/proc_man.c -o ./build/process_manager/proc_man.o
+
 clean:
 	rm -f ./bin/boot.bin
 	rm -f ./bin/Kernel16F.bin

@@ -1,5 +1,5 @@
-#ifndef FILE_H
-#define FILE_H
+#ifndef FILESYSTEM_H
+#define FILESYSTEM_H
 
 struct disk* disk;
 typedef void*(*FS_OPEN_FUNCTION)(struct disk* disk, char* filename, char mode);

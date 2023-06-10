@@ -1,14 +1,12 @@
 #ifndef FILESYSTEM_H
 #define FILESYSTEM_H
-
-#include "../headers/stdio.h"
 #include "../disk_operations/disk.h"
-#include "../string/string.h"
-typedef void* (*FS_OPEN_FUNCTION)(struct disk* disk, char* filename, char mode);
-typedef int (*FS_RESOLVE_FUNCTION)(struct disk* disk);
-
+struct disk* disk;
+typedef void*(*FS_OPEN_FUNCTION)(struct disk* disk, char* filename, char mode);
+typedef int(*FS_RESOLVE_FUNCTION)(struct disk* disk);
 struct filesystem
 {
+    // Filesystem should return zero from resolve if the provided disk is using its filesystem
     FS_RESOLVE_FUNCTION resolve;
     FS_OPEN_FUNCTION open;
     char name[20];
@@ -17,6 +15,6 @@ struct filesystem
 void fs_load();
 int fopen(char* filename, char mode);
 void fs_insert_filesystem(struct filesystem* filesystem);
-struct filesystem* fs_resolve(struct disk* disk);
+struct filesystem* fs_resolve_(struct disk* disk);
 
 #endif
